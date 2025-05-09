@@ -19,7 +19,7 @@ jobs:
 
       - name: Upload to coverall.io
         run: |
-          cargo tarpaulin --verbose --all-features --workspace --ignore-tests --coveralls ${{ secrets.COVERALL_TOKEN }}
+          cargo tarpaulin --verbose --all-features --workspace --ignore-tests --coveralls ${{ env.COVERALL_TOKEN }}
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v5

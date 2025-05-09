@@ -3,4 +3,12 @@ name = "zero_to_production_rust_book"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+path = "src/lib.rs"
+
 [dependencies]
+actix-web = "4.10.2"
+tokio = { features = ["macros", "rt-multi-thread"], version = "1.45.0" }
+
+[dev-dependencies]
+reqwest = "0.12.15"
