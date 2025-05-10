@@ -1,32 +1,65 @@
 use std::net::TcpListener;
-use sqlx::{Connection, PgConnection, PgPool};
-use zero_to_production_rust_book::configuration::get_configuration;
+use sqlx::{Connection, Executor, PgConnection, PgPool};
+use uuid::Uuid;
+use zero_to_production_rust_book::configuration::{get_configuration, DatabaseSettings};
 use zero_to_production_rust_book::startup::run;
 
 
 
-async fn spawn_app() -> String{
+struct TestApp {
+    address: String,
+    db_pool: PgPool,
+}
+
+async fn spawn_app() -> TestApp {
     let listener = TcpListener::bind("0.0.0.0:0").expect("Failed to bind address");
     let port = listener.local_addr().unwrap().port();
     
-    let configuration = get_configuration().expect("Failed to get configuration");
-    let db_pool = PgPool::connect(&configuration.database.connection_string())
-        .await
-        .expect("Failed to connect to database");
+    let mut configuration = get_configuration().expect("Failed to get configuration");
+    configuration.database.database_name = Uuid::new_v4().to_string();
     
-    let server = run(listener, db_pool).expect("Failed to bind address");
+    let db_pool = configure_database(&configuration.database).await;
+    
+    let server = run(listener, db_pool.clone()).expect("Failed to bind address");
     tokio::spawn(server);
     
-    format!("http://0.0.0.0:{}", port)
+    TestApp {
+        address: format!("http://0.0.0.0:{}", port),
+        db_pool,
+    }
+}
+
+
+pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
+    // Create a database
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres");
+    
+    connection.execute(format!(r#"CREATE DATABASE "{}";"#, config.database_name).as_str())
+        .await
+        .expect("Failed to create database.");
+    
+    // Migrate database
+    let connection_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to Postgres."); 
+    
+    sqlx::migrate!("./migrations")
+        .run(&connection_pool)
+        .await
+        .expect("Failed to migrate the database");
+    
+    connection_pool
 }
 
 #[tokio::test]
 async fn health_check() {
-    let address = spawn_app().await;
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let response = client
-        .get(format!("{}/health_check", &address))
+        .get(format!("{}/health_check", app.address))
         .send()
         .await
         .expect("Failed to execute request.");
@@ -37,16 +70,13 @@ async fn health_check() {
 
 #[tokio::test]
 async fn subscribe_return_200_for_valid_form() {
-    let address = spawn_app().await;
-    let configuration = get_configuration().expect("Failed to get configuration");
-    let connection_string = configuration.database.connection_string();
-    let mut connection = PgConnection::connect(&connection_string).await.expect("Failed to connect to database");
+    let mut app = spawn_app().await;
 
     let client = reqwest::Client::new();
 
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
     let response = client
-        .post(format!("{}/subscriptions", &address))
+        .post(format!("{}/subscriptions", &app.address))
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
@@ -54,7 +84,7 @@ async fn subscribe_return_200_for_valid_form() {
         .expect("Failed to execute request.");
 
     let saved = sqlx::query!("SELECT name, email FROM subscriptions")
-        .fetch_one(&mut connection)
+        .fetch_one(&app.db_pool)
         .await
         .expect("Failed to fetch subscription");
 
@@ -65,7 +95,7 @@ async fn subscribe_return_200_for_valid_form() {
 
 #[tokio::test]
 async fn subscribe_returns_a_400_when_data_is_missing() {
-    let address = spawn_app().await;
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let test_cases = vec![
@@ -76,7 +106,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
 
     for (body, message) in test_cases {
         let response = client
-            .post(format!("{}/subscriptions", &address))
+            .post(format!("{}/subscriptions", &app.address))
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body(body)
             .send()
