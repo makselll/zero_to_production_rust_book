@@ -19,6 +19,8 @@ DB_NAME="${POSTGRES_DB:=newsletter}"
 # Check if a custom port has been set, otherwise default to '5432'
 DB_PORT="${POSTGRES_PORT:=5432}"
 
+DB_HOST="${POSTGRES_HOST:=localhost}"
+
 # Start the services using Docker Compose
 if [[ -z "${SKIP_DB}" ]]
 then
@@ -26,7 +28,7 @@ then
 fi
 
 export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "localhost" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
+until psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
   >&2 echo "Postgres is still unavailable - sleeping"
   sleep 1
 done
