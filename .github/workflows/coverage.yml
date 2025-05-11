@@ -15,6 +15,7 @@ jobs:
 
       - name: Upload to coverall.io
         run: |
+          cargo install --version=0.5.7 sqlx-cli --no-default-features --features postgres
           ./scripts/init_db.sh
           cargo tarpaulin --verbose --all-features --workspace --ignore-tests --coveralls ${{ secrets.COVERALL_TOKEN }}
 
