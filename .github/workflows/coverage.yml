@@ -12,7 +12,8 @@ jobs:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: newsletter
       POSTGRES_PORT: 5432
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: localhost
+      DATABASE_URL: postgres://postgres:password@postgres:5432/newsletter
     container:
       image: xd009642/tarpaulin:develop-nightly
       options: --security-opt seccomp=unconfined
@@ -44,7 +45,6 @@ jobs:
 
       - name: Upload to coverall.io
         run: |
-          export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
           cargo tarpaulin --verbose --all-features --workspace --ignore-tests --coveralls ${{ secrets.COVERALL_TOKEN }}
 
       - name: Upload to codecov.io
