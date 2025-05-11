@@ -12,7 +12,7 @@ jobs:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: newsletter
       POSTGRES_PORT: 5432
-      POSTGRES_HOST: localhost
+      POSTGRES_HOST: postgres
       DATABASE_URL: postgres://postgres:password@postgres:5432/newsletter
     container:
       image: xd009642/tarpaulin:develop-nightly
