@@ -38,6 +38,7 @@ jobs:
           POSTGRES_PORT: 5432
           POSTGRES_HOST: postgres
         run: |
+          apt-get update && apt-get install -y postgresql-client
           cargo install --version=0.5.7 sqlx-cli --no-default-features --features postgres
           export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
           ./scripts/init_db.sh
