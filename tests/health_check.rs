@@ -1,9 +1,24 @@
 use std::net::TcpListener;
+use once_cell::sync::Lazy;
+use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use zero_to_production_rust_book::configuration::{get_configuration, DatabaseSettings};
 use zero_to_production_rust_book::startup::run;
+use zero_to_production_rust_book::telemetry::{get_subscriber, init_subscriber};
 
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let default_filter_layer = "info".to_string();
+    let subscriber_name = "test".to_string();
+    
+    if std::env::var("TEST_LOG").is_ok_and(|x| x.to_lowercase() == "true")  {
+        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::stdout);
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::sink);
+        init_subscriber(subscriber);
+    }
+});
 
 
 struct TestApp {
@@ -12,12 +27,14 @@ struct TestApp {
 }
 
 async fn spawn_app() -> TestApp {
+    dotenv::dotenv().ok();
+    Lazy::force(&TRACING);
+    
     let listener = TcpListener::bind("0.0.0.0:0").expect("Failed to bind address");
     let port = listener.local_addr().unwrap().port();
     
     let mut configuration = get_configuration().expect("Failed to get configuration");
     configuration.database.database_name = Uuid::new_v4().to_string();
-    
     let db_pool = configure_database(&configuration.database).await;
     
     let server = run(listener, db_pool.clone()).expect("Failed to bind address");
@@ -32,7 +49,7 @@ async fn spawn_app() -> TestApp {
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
     // Create a database
-    let mut connection = PgConnection::connect(&config.connection_string_without_db())
+    let mut connection = PgConnection::connect(&config.connection_string_without_db().expose_secret())
         .await
         .expect("Failed to connect to Postgres");
     
@@ -41,7 +58,7 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to create database.");
     
     // Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect(&config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres."); 
     
@@ -70,8 +87,9 @@ async fn health_check() {
 
 #[tokio::test]
 async fn subscribe_return_200_for_valid_form() {
-    let mut app = spawn_app().await;
-
+    let app = spawn_app().await;
+    assert_eq!(std::env::var("TEST_LOG").is_ok(), true, "TEST_LOG must be set to true");
+    
     let client = reqwest::Client::new();
 
     let body = "name=le%20guin&email=ursula_le_guin%40gmail.com";
