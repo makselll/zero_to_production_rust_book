@@ -15,6 +15,7 @@ jobs:
 
       - name: Upload to coverall.io
         run: |
+          ./scripts/init_db.sh
           cargo tarpaulin --verbose --all-features --workspace --ignore-tests --coveralls ${{ secrets.COVERALL_TOKEN }}
 
       - name: Upload to codecov.io
