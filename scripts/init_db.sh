@@ -24,7 +24,7 @@ DB_NAME="${POSTGRES_DB:=newsletter}"
 # Check if a custom port has been set, otherwise default to '5432'
 DB_PORT="${POSTGRES_PORT:=5432}"
 # Launch postgres using Docker
-if [[ -z "${SKIP_DOCKER}" ]]
+if [[ -z "${SKIP_DB}" ]]
 then
   docker run \
       -e POSTGRES_USER=${DB_USER} \
@@ -47,3 +47,5 @@ export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${
 sqlx database create
 sqlx migrate run
 >&2 echo "Postgres has been migrated, ready to go!"
+
+docker run -d -e COLLECTOR_OTLP_ENABLED=true -p 16686:16686 -p 4317:4317 jaegertracing/all-in-one:1.38.0

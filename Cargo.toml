@@ -21,7 +21,10 @@ once_cell = "1.21.3"
 dotenv = "0.15.0"
 secrecy = { version = "0.10.3" , features = ["serde"]}
 tracing-actix-web = "0.7.18"
-
+tracing-opentelemetry = "0.30.0"
+opentelemetry_sdk = { version = "0.29.0", features = ["default", "serde"] }
+opentelemetry = { version = "0.29.1"}
+opentelemetry-otlp = { version= "0.29.0", features = ["tonic", "metrics", "grpc-tonic"] }
 
 [dev-dependencies]
 reqwest = "0.12.15"
