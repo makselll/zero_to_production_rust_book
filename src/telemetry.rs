@@ -7,7 +7,7 @@ use tracing::subscriber::set_global_default;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
 use tracing_subscriber::EnvFilter;
-use tracing_subscriber::fmt::MakeWriter;
+use tracing_subscriber::fmt::{format, MakeWriter};
 use opentelemetry_sdk::trace::{RandomIdGenerator, Sampler, SdkTracerProvider};
 use opentelemetry::{
     global,
@@ -16,11 +16,13 @@ use opentelemetry::{
 };
 use opentelemetry_sdk::trace::Tracer as SdkTracer;
 use opentelemetry_otlp::{WithExportConfig};
+use crate::configuration::JaegerSettings;
 
 pub fn get_subscriber<Sink>(
     name: String,
     env_filter: String,
-    sink: Sink
+    sink: Sink,
+    settings: JaegerSettings,
 ) -> impl Subscriber + Send + Sync
     where
         Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
@@ -28,7 +30,7 @@ pub fn get_subscriber<Sink>(
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
     let formatter_layer = BunyanFormattingLayer::new(name, sink);
 
-    let tracer = construct_open_telemetry_tracer();
+    let tracer = construct_open_telemetry_tracer(&settings.address, settings.port);
     let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
 
     tracing_subscriber::Registry::default()
@@ -43,10 +45,10 @@ pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync + 'static) {
     set_global_default(subscriber).expect("Failed to set global default subscriber");
 }
 
-pub fn construct_open_telemetry_tracer() -> SdkTracer {
+pub fn construct_open_telemetry_tracer(address: &String, port: u16) -> SdkTracer {
     let exporter = opentelemetry_otlp::SpanExporter::builder()
         .with_tonic()
-        .with_endpoint("http://0.0.0.0:4317")
+        .with_endpoint(format!("http://{}:{}", address, port))
         .with_timeout(Duration::from_secs(3))
         .build().unwrap();
 

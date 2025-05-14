@@ -1,0 +1,13 @@
+application:
+  port: 8000
+
+database:
+  host: "postgres"
+  port: 5432
+  username: "postgres"
+  password: "password"
+  database_name: "newsletter"
+
+jaeger:
+  address: "jaeger"
+  port: 4317

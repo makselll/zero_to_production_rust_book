@@ -23,3 +23,10 @@ services:
     ports:
       - "16686:16686"
       - "4317:4317"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"

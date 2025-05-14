@@ -3,7 +3,7 @@ use once_cell::sync::Lazy;
 use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
-use zero_to_production_rust_book::configuration::{get_configuration, DatabaseSettings};
+use zero_to_production_rust_book::configuration::{get_configuration, DatabaseSettings, JaegerSettings};
 use zero_to_production_rust_book::startup::run;
 use zero_to_production_rust_book::telemetry::{get_subscriber, init_subscriber};
 
@@ -11,11 +11,13 @@ static TRACING: Lazy<()> = Lazy::new(|| {
     let default_filter_layer = "info".to_string();
     let subscriber_name = "test".to_string();
     
+    let jaeger_settings = JaegerSettings{address: "0.0.0.0".to_string(), port: 4317};
+    
     if std::env::var("TEST_LOG").is_ok_and(|x| x.to_lowercase() == "true")  {
-        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::stdout);
+        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::stdout, jaeger_settings);
         init_subscriber(subscriber);
     } else {
-        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::sink);
+        let subscriber = get_subscriber(subscriber_name, default_filter_layer, std::io::sink, jaeger_settings);
         init_subscriber(subscriber);
     }
 });
