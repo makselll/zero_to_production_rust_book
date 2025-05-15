@@ -28,5 +28,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runtime
     ports:
       - "8000:8000"
