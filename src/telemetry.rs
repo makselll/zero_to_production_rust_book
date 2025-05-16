@@ -7,7 +7,7 @@ use tracing::subscriber::set_global_default;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_log::LogTracer;
 use tracing_subscriber::EnvFilter;
-use tracing_subscriber::fmt::{format, MakeWriter};
+use tracing_subscriber::fmt::{MakeWriter};
 use opentelemetry_sdk::trace::{RandomIdGenerator, Sampler, SdkTracerProvider};
 use opentelemetry::{
     global,

@@ -1,6 +1,4 @@
 use std::net::TcpListener;
-use secrecy::ExposeSecret;
-use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 use zero_to_production_rust_book::configuration::get_configuration;
 use zero_to_production_rust_book::startup::run;
@@ -18,8 +16,6 @@ async fn main() -> std::io::Result<()> {
     let address = format!("{}:{}", configuration.application.address, configuration.application.port);
     let listener = TcpListener::bind(address)?;
 
-    let db_pool = PgPoolOptions::new()
-        .connect_lazy(&configuration.database.connection_string().expose_secret())
-        .expect("Failed to connect to database");
+    let db_pool = PgPoolOptions::new().connect_lazy_with(configuration.database.without_db());
     run(listener, db_pool)?.await
 }

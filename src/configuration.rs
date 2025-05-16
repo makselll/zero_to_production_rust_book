@@ -1,5 +1,6 @@
 use secrecy::{ExposeSecret, SecretString};
 use config::Config;
+use sqlx::postgres::PgConnectOptions;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings {
@@ -30,18 +31,16 @@ pub struct DatabaseSettings { pub username: String,
 
 
 impl DatabaseSettings {
-    pub fn connection_string(&self) -> SecretString { 
-        SecretString::from(format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.username, self.password.expose_secret(), self.host, self.port, self.database_name
-        ))
+    pub fn with_db(&self) -> PgConnectOptions {
+        self.without_db().database(&self.database_name)
     }
 
-    pub fn connection_string_without_db(&self) -> SecretString {
-        SecretString::from(format!(
-            "postgres://{}:{}@{}:{}",
-            self.username, self.password.expose_secret(), self.host, self.port
-        ))
+    pub fn without_db(&self) -> PgConnectOptions {
+        PgConnectOptions::new()
+            .host(&self.host)
+            .port(self.port)
+            .username(&self.username)
+            .password(&self.password.expose_secret())
     }
 }
 
@@ -57,12 +56,13 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> { // Initial
         .unwrap_or_else(|_| "local".into())
         .try_into()
         .expect("Failed to parse APP_ENVIRONMENT.");
-    
+
     let settings = Config::builder()
         .add_source(config::File::from(configuration_directory.join("base")).required(true))
         .add_source(config::File::from(configuration_directory.join(environment.as_str())).required(true))
+        .add_source(config::Environment::with_prefix("app").separator("__"))
         .build()?;
-    
+
     settings.try_deserialize()
 }
 
@@ -79,7 +79,7 @@ impl Environment {
 }
 impl TryFrom<String> for Environment {
     type Error = String;
-    fn try_from(s: String) -> Result<Self, Self::Error> { 
+    fn try_from(s: String) -> Result<Self, Self::Error> {
         match s.to_lowercase().as_str() {
             "local" => Ok(Self::Local),
             "production" => Ok(Self::Production),
