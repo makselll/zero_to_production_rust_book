@@ -1,6 +1,8 @@
 use secrecy::{ExposeSecret, SecretString};
 use config::Config;
-use sqlx::postgres::PgConnectOptions;
+use sqlx::ConnectOptions;
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use tracing::log::LevelFilter;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings {
@@ -27,20 +29,26 @@ pub struct DatabaseSettings { pub username: String,
     pub port: u16,
     pub host: String,
     pub database_name: String,
+    pub require_ssl: bool,
 }
 
 
 impl DatabaseSettings {
     pub fn with_db(&self) -> PgConnectOptions {
-        self.without_db().database(&self.database_name)
+        self.without_db()
+            .database(&self.database_name)
+            .log_statements(LevelFilter::Trace)
     }
 
     pub fn without_db(&self) -> PgConnectOptions {
+        let ssl_mode = if self.require_ssl { PgSslMode::Require } else { PgSslMode::Disable };
+
         PgConnectOptions::new()
             .host(&self.host)
             .port(self.port)
             .username(&self.username)
             .password(&self.password.expose_secret())
+            .ssl_mode(ssl_mode)
     }
 }
 
@@ -49,7 +57,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> { // Initial
 
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let configuration_directory = base_path.join("configuration");
-    
+
     // Detect the running environment.
     // Default to `local` if unspecified.
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
