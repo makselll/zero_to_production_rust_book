@@ -9,7 +9,6 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
     let configuration = get_configuration().expect("Failed to get configuration");
-    dbg!(&configuration);
     
     let subscriber = get_subscriber("zero2prod".into(), "info".to_string(), std::io::stdout, configuration.jaeger);
     init_subscriber(subscriber);

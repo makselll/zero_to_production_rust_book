@@ -31,13 +31,13 @@ pub fn get_subscriber<Sink>(
     let formatter_layer = BunyanFormattingLayer::new(name, sink);
 
     let tracer = construct_open_telemetry_tracer(&settings.address, settings.port);
-    let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+    // let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
 
     tracing_subscriber::Registry::default()
         .with(env_filter)
         .with(JsonStorageLayer)
         .with(formatter_layer)
-        .with(telemetry_layer)
+        // .with(telemetry_layer)
 }
 
 pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync + 'static) {
