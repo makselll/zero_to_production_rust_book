@@ -10,7 +10,7 @@ path = "src/lib.rs"
 actix-web = "4.10.2"
 tokio = { features = ["macros", "rt-multi-thread"], version = "1.45.0" }
 serde = { version = "1.0.219", features = ["derive"] }
-sqlx = { version = "0.8.5", features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate"] }
+sqlx = { version = "0.8.5", features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate", "runtime-tokio-native-tls"] }
 config = { version = "0.15.11" , features = ["default", "yaml"]}
 uuid = { version = "1.16.0", features = ["v4"] }
 tracing = { version = "0.1.41", features = ["log"] }
