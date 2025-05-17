@@ -23,7 +23,7 @@ services:
     source_dir: .
     github:
       branch: main
-      deploy_on_push: true
+      deploy_on_push: false
       repo: makselll/zero_to_production_rust_book
     health_check:
       http_path: /health_check

@@ -25,6 +25,11 @@ tracing-opentelemetry = "0.30.0"
 opentelemetry_sdk = { version = "0.29.0", features = ["default", "serde"] }
 opentelemetry = { version = "0.29.1"}
 opentelemetry-otlp = { version= "0.29.0", features = ["tonic", "metrics", "grpc-tonic"] }
+unicode-segmentation = "1.12.0"
+claim = "0.5.0"
+validator = { version = "0.20.0" }
 
 [dev-dependencies]
 reqwest = "0.12.15"
+fake = "4.3.0"
+proptest = "1.6.0"

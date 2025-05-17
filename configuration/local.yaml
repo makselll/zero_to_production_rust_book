@@ -1,2 +1,8 @@
 application:
-  address: 127.0.0.1
+  address: 0.0.0.0
+
+database:
+  host: 0.0.0.0
+
+jaeger:
+  address: 0.0.0.0
