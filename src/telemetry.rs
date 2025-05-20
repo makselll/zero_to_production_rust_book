@@ -22,7 +22,7 @@ pub fn get_subscriber<Sink>(
     name: String,
     env_filter: String,
     sink: Sink,
-    settings: JaegerSettings,
+    settings: &JaegerSettings,
 ) -> impl Subscriber + Send + Sync
     where
         Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,

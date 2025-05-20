@@ -5,7 +5,7 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use tracing::log::LevelFilter;
 use crate::damain::SubscriberEmail;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
@@ -13,19 +13,19 @@ pub struct Settings {
     pub email_client: EmailClientSettings,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct JaegerSettings {
     pub address: String,
     pub port: u16,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct ApplicationSettings {
     pub address: String,
     pub port: u16,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct DatabaseSettings { pub username: String,
     pub password: SecretString,
     pub port: u16,
@@ -34,7 +34,7 @@ pub struct DatabaseSettings { pub username: String,
     pub require_ssl: bool,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
