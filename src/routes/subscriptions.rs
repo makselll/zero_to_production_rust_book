@@ -51,9 +51,9 @@ pub async fn insert_subscriber(new_subscriber: &NewSubscriber, db_pool: &PgPool)
 pub async fn subscriptions(Form(form): Form<FormData>, db_pool: web::Data<PgPool>) -> impl Responder {
     let new_subscriber = match form.try_into() {
         Ok(new_subscriber) => new_subscriber,
-        Err(e) => return HttpResponse::BadRequest()
+        Err(_) => return HttpResponse::BadRequest()
     };
-    
+
     match insert_subscriber(&new_subscriber, &db_pool).await
     {
         Ok(_) => HttpResponse::Ok(),

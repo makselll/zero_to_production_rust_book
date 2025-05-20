@@ -3,4 +3,5 @@ pub mod configuration;
 pub mod routes;
 pub mod telemetry;
 
-mod damain;
+pub mod damain;
+pub mod email_client;

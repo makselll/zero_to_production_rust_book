@@ -8,7 +8,7 @@ path = "src/lib.rs"
 
 [dependencies]
 actix-web = "4.10.2"
-tokio = { features = ["macros", "rt-multi-thread"], version = "1.45.0" }
+tokio = { features = ["macros", "rt-multi-thread", "rt"], version = "1.45.0" }
 serde = { version = "1.0.219", features = ["derive"] }
 sqlx = { version = "0.8.5", features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate", "runtime-tokio-native-tls"] }
 config = { version = "0.15.11" , features = ["default", "yaml"]}
@@ -28,8 +28,10 @@ opentelemetry-otlp = { version= "0.29.0", features = ["tonic", "metrics", "grpc-
 unicode-segmentation = "1.12.0"
 claim = "0.5.0"
 validator = { version = "0.20.0" }
+reqwest = { version = "0.12.15", features = ["json", "rustls-tls"] }
+serde_json = "1.0.140"
 
 [dev-dependencies]
-reqwest = "0.12.15"
 fake = "4.3.0"
 proptest = "1.6.0"
+wiremock = "0.6.3"

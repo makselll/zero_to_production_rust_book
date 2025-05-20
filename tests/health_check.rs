@@ -3,6 +3,7 @@ use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use zero_to_production_rust_book::configuration::{get_configuration, DatabaseSettings, JaegerSettings};
+use zero_to_production_rust_book::email_client::EmailClient;
 use zero_to_production_rust_book::startup::run;
 use zero_to_production_rust_book::telemetry::{get_subscriber, init_subscriber};
 
@@ -38,7 +39,15 @@ async fn spawn_app() -> TestApp {
     configuration.database.database_name = Uuid::new_v4().to_string();
     let db_pool = configure_database(&configuration.database).await;
     
-    let server = run(listener, db_pool.clone()).expect("Failed to bind address");
+    let timeout = configuration.email_client.timeout();
+    let email_client = EmailClient::new(
+        configuration.email_client.sender().expect("Failed to get email sender"),
+        configuration.email_client.base_url,
+        timeout
+    );
+
+
+    let server = run(listener, db_pool.clone(), email_client).expect("Failed to bind address");
     tokio::spawn(server);
     
     TestApp {

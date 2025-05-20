@@ -1,0 +1,18 @@
+[
+  {
+    "httpRequest" : {
+      "method" : "POST",
+      "path" : "/email"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": {
+        "ErrorCode": 0,
+        "Message": "OK",
+        "MessageID": "f47754ba-9caf-4047-84b9-3005ab648416",
+        "SubmittedAt": "2025-05-19T14:56:11.6607301Z",
+        "To": "simplelogin-newsletter.stress348@simplelogin.com"
+      }
+    }
+  }
+]

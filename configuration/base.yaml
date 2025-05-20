@@ -12,3 +12,8 @@ database:
 jaeger:
   address: "jaeger"
   port: 4317
+
+email_client:
+  base_url: "http://0.0.0.0:1080"
+  sender_email: "maxim.shelgunov@my.games"
+  timeout_seconds: 10

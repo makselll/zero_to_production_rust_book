@@ -24,6 +24,17 @@ services:
       - "16686:16686"
       - "4317:4317"
 
+  postmark:
+    image: mockserver/mockserver:latest
+    ports:
+      - "1080:1080"
+    environment:
+      MOCKSERVER_WATCH_INITIALIZATION_JSON: "true"
+      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/postmark_mock.json
+    volumes:
+      - ./postmark_mock.json:/config/postmark_mock.json
+
   app:
     build:
       context: .
