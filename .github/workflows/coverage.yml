@@ -8,11 +8,11 @@ jobs:
     environment: PROD
     env:
       SKIP_DB: true
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: newsletter
-      POSTGRES_PORT: 5432
-      POSTGRES_HOST: postgres
+      APP__DATABASE__USERNAME: postgres
+      APP__DATABASE__PASSWORD: password
+      APP__DATABASE__DATABASE_NAME: newsletter
+      APP__DATABASE__PORT: 5432
+      APP__DATABASE__HOST: postgres
     container:
       image: xd009642/tarpaulin:develop-nightly
       options: --security-opt seccomp=unconfined
