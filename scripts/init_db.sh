@@ -11,15 +11,15 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 # Check if a custom user has been set, otherwise default to 'postgres'
-DB_USER=${POSTGRES_USER:=postgres}
+DB_USER=${APP__DATABASE__USERNAME:=postgres}
 # Check if a custom password has been set, otherwise default to 'password'
-DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
+DB_PASSWORD="${APP__DATABASE__PASSWORD:=password}"
 # Check if a custom database name has been set, otherwise default to 'newsletter'
-DB_NAME="${POSTGRES_DB:=newsletter}"
+DB_NAME="${APP__DATABASE__DATABASE_NAME:=newsletter}"
 # Check if a custom port has been set, otherwise default to '5432'
-DB_PORT="${POSTGRES_PORT:=5432}"
+DB_PORT="${APP__DATABASE__PORT:=5432}"
 
-DB_HOST="${POSTGRES_HOST:=localhost}"
+DB_HOST="${APP__DATABASE__HOST:=localhost}"
 
 # Start the services using Docker Compose
 if [[ -z "${SKIP_DB}" ]]
