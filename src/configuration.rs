@@ -23,6 +23,7 @@ pub struct JaegerSettings {
 pub struct ApplicationSettings {
     pub address: String,
     pub port: u16,
+    pub base_url: String,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]
